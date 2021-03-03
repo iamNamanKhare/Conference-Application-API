@@ -2,7 +2,9 @@ package com.example.conferencespringboot.controllers;
 
 import com.example.conferencespringboot.models.Session;
 import com.example.conferencespringboot.repositories.SessionRepository;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +27,21 @@ public class SessionsController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Session create(@RequestBody final Session session){
         return sessionRepository.saveAndFlush(session);
+    }
+
+    @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
+    public void delete(@PathVariable Long id) {
+        sessionRepository.deleteById(id);
+    }
+
+    @RequestMapping(value = "{id}", method = RequestMethod.PUT)
+    public Session update(@PathVariable Long id, @RequestBody Session session) {
+        // Both id and all attributes of Session from Request-body needs to be validated
+        Session existingSession = sessionRepository.getOne(id);
+        BeanUtils.copyProperties(session, existingSession, "session_id");
+        return sessionRepository.saveAndFlush(existingSession);
     }
 }
